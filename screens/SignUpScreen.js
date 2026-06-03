@@ -9,7 +9,7 @@ export default function SignUpScreen({ navigation }) {
         <Text style={styles.backText}>Back</Text>
       </TouchableOpacity>
       <Text style={styles.title}>Create account</Text>
-      <Text style={styles.subtitle}>Join thousands of Filipino home seekers</Text>
+      <Text style={styles.subtitle}>Find your perfect staycation — book in minutes</Text>
       <View style={styles.form}>
         <Text style={styles.label}>Full name</Text>
         <TextInput style={styles.input} placeholder="Juan dela Cruz" placeholderTextColor="#445566" />
@@ -19,7 +19,7 @@ export default function SignUpScreen({ navigation }) {
         <TextInput style={styles.input} placeholder="09XX XXX XXXX" placeholderTextColor="#445566" keyboardType="phone-pad" />
         <Text style={styles.label}>Password</Text>
         <TextInput style={styles.input} placeholder="At least 8 characters" placeholderTextColor="#445566" secureTextEntry />
-        <TouchableOpacity style={styles.btnPrimary} onPress={() => navigation.navigate('Map')}>
+        <TouchableOpacity style={styles.btnPrimary} onPress={() => navigation.navigate('Home')}>
           <Text style={styles.btnPrimaryText}>Create my account</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>

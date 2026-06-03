@@ -130,6 +130,121 @@ function UserMarker({ spoofed, focused }) {
   );
 }
 
+const CAL_CELL = Math.floor((width - 48 - 12) / 7);
+
+function CalendarModal({ visible, onClose, onSelect, minimumDate, title, selectedDate, rangeStart, rangeEnd }) {
+  const [month, setMonth] = useState(() => {
+    const base = selectedDate || minimumDate || new Date();
+    return new Date(base.getFullYear(), base.getMonth(), 1);
+  });
+
+  useEffect(() => {
+    if (visible) {
+      const base = selectedDate || minimumDate || new Date();
+      setMonth(new Date(base.getFullYear(), base.getMonth(), 1));
+    }
+  }, [visible]);
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  const firstDow = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
+  const cells = [...Array(firstDow).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+
+  const toMidnight = (d) => { const c = new Date(d); c.setHours(0, 0, 0, 0); return c; };
+  const cellDate = (day) => new Date(month.getFullYear(), month.getMonth(), day);
+
+  const isDisabled = (day) => !day || (minimumDate && cellDate(day) < toMidnight(minimumDate));
+  const isSelected = (day) => day && selectedDate && cellDate(day).toDateString() === toMidnight(selectedDate).toDateString();
+  const isToday = (day) => day && cellDate(day).toDateString() === today.toDateString();
+  const isInRange = (day) => {
+    if (!day || !rangeStart || !rangeEnd) return false;
+    const d = cellDate(day);
+    return d > toMidnight(rangeStart) && d < toMidnight(rangeEnd);
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={calS.overlay}>
+        <View style={calS.sheet}>
+          <View style={calS.header}>
+            <Text style={calS.title}>{title}</Text>
+            <TouchableOpacity onPress={onClose}><Text style={calS.done}>Done</Text></TouchableOpacity>
+          </View>
+          <View style={calS.monthNav}>
+            <TouchableOpacity onPress={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} style={calS.navBtn}>
+              <Text style={calS.navBtnText}>‹</Text>
+            </TouchableOpacity>
+            <Text style={calS.monthLabel}>
+              {month.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' })}
+            </Text>
+            <TouchableOpacity onPress={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} style={calS.navBtn}>
+              <Text style={calS.navBtnText}>›</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={calS.weekRow}>
+            {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+              <Text key={d} style={calS.weekDay}>{d}</Text>
+            ))}
+          </View>
+          <View style={calS.grid}>
+            {cells.map((day, i) => (
+              <TouchableOpacity
+                key={i}
+                style={[
+                  calS.cell,
+                  isSelected(day) && calS.cellSelected,
+                  isInRange(day) && calS.cellInRange,
+                  isDisabled(day) && calS.cellDisabled,
+                ]}
+                onPress={() => {
+                  if (!day || isDisabled(day)) return;
+                  onSelect(cellDate(day));
+                  onClose();
+                }}
+                disabled={!day || isDisabled(day)}
+              >
+                <Text style={[
+                  calS.cellText,
+                  isSelected(day) && calS.cellTextSelected,
+                  isInRange(day) && calS.cellTextInRange,
+                  isToday(day) && !isSelected(day) && calS.cellTextToday,
+                  isDisabled(day) && calS.cellTextDisabled,
+                ]}>
+                  {day || ''}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const calS = StyleSheet.create({
+  overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)' },
+  sheet: { backgroundColor: '#0A1628', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 24, paddingBottom: 40 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#1E3050' },
+  title: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  done: { color: '#4A9EFF', fontSize: 15, fontWeight: '700' },
+  monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16 },
+  navBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  navBtnText: { color: '#4A9EFF', fontSize: 26, fontWeight: '300' },
+  monthLabel: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  weekRow: { flexDirection: 'row', marginBottom: 8 },
+  weekDay: { width: CAL_CELL, textAlign: 'center', color: '#445566', fontSize: 12, fontWeight: '600' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap' },
+  cell: { width: CAL_CELL, height: CAL_CELL, alignItems: 'center', justifyContent: 'center', borderRadius: CAL_CELL / 2 },
+  cellSelected: { backgroundColor: '#4A9EFF' },
+  cellInRange: { backgroundColor: 'rgba(74,158,255,0.15)', borderRadius: 0 },
+  cellDisabled: { opacity: 0.25 },
+  cellText: { color: '#FFFFFF', fontSize: 14 },
+  cellTextSelected: { color: '#FFFFFF', fontWeight: '800' },
+  cellTextInRange: { color: '#4A9EFF' },
+  cellTextToday: { color: '#4A9EFF', fontWeight: '700' },
+  cellTextDisabled: { color: '#445566' },
+});
+
 export default function MapScreen({ route, navigation }) {
   const { properties, adminMode, spoofedLocation, setSpoofedLocation } = useProperties();
   const insets = useSafeAreaInsets();
@@ -157,6 +272,10 @@ export default function MapScreen({ route, navigation }) {
   const [speedMultiplier, setSpeedMultiplier] = useState(1.0); // 0.2 (slow) to 3.0 (fast)
   const [sliderX, setSliderX] = useState(SLIDER_WIDTH * 0.27); // visual position
   const [gpsFocused, setGpsFocused] = useState(false);
+  const [checkIn, setCheckIn] = useState(null);
+  const [checkOut, setCheckOut] = useState(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [activeDateField, setActiveDateField] = useState('checkIn');
   const mapRef = useRef(null);
   const scrollRef = useRef(null);
   const speedRef = useRef(1.0);
@@ -167,6 +286,12 @@ export default function MapScreen({ route, navigation }) {
   useEffect(() => {
     speedRef.current = speedMultiplier;
   }, [speedMultiplier]);
+
+  useEffect(() => {
+    setCheckIn(null);
+    setCheckOut(null);
+    setCalendarOpen(false);
+  }, [detailProperty?.id]);
 
   // Persistent location: spoofed survives toggling adminMode off
   const effectiveLocation = spoofedLocation
@@ -424,9 +549,18 @@ export default function MapScreen({ route, navigation }) {
     setDetailProperty(property);
   };
 
+  const formatDate = (d) => d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+  const calcNights = () => (!checkIn || !checkOut) ? 0 : Math.round((checkOut - checkIn) / 86400000);
+
   const openChat = (property) => {
     setDetailProperty(null);
-    navigation.navigate('Chat', { property });
+    const nights = calcNights();
+    navigation.navigate('Chat', {
+      property,
+      checkIn: checkIn ? checkIn.toISOString() : null,
+      checkOut: checkOut ? checkOut.toISOString() : null,
+      nights: nights || null,
+    });
   };
 
   // GPS focus mode: zoom IN with pulsing radiance
@@ -546,40 +680,41 @@ export default function MapScreen({ route, navigation }) {
         </TouchableOpacity>
       )}
 
-      {/* Floating joystick + speed slider side by side */}
+      {/* Floating joystick + speed slider + dev toolbar */}
       {adminMode && (
-        <View style={styles.joystickWrap}>
-          <View style={styles.joystickFloat} {...joystickPan.panHandlers}>
-            <View style={styles.joystickBase}>
-              <View style={[styles.joystickStick, { transform: [{ translateX: joystickPos.x }, { translateY: joystickPos.y }] }]} />
+        <>
+          <View style={styles.joystickWrap}>
+            <View style={styles.joystickFloat} {...joystickPan.panHandlers}>
+              <View style={styles.joystickBase}>
+                <View style={[styles.joystickStick, { transform: [{ translateX: joystickPos.x }, { translateY: joystickPos.y }] }]} />
+              </View>
+            </View>
+            <View style={styles.speedSliderWrap}>
+              <Text style={styles.speedLabel}>Speed: {speedLabel} ({speedMultiplier.toFixed(1)}x)</Text>
+              <View style={styles.sliderTrack} {...sliderPan.panHandlers}>
+                <View style={[styles.sliderFill, { width: sliderX }]} />
+                <View style={[styles.sliderThumb, { left: sliderX - 10 }]} />
+              </View>
             </View>
           </View>
-          <View style={styles.speedSliderWrap}>
-            <Text style={styles.speedLabel}>Speed: {speedLabel} ({speedMultiplier.toFixed(1)}x)</Text>
-            <View style={styles.sliderTrack} {...sliderPan.panHandlers}>
-              <View style={[styles.sliderFill, { width: sliderX }]} />
-              <View style={[styles.sliderThumb, { left: sliderX - 10 }]} />
+          <View style={styles.devTopRow}>
+            <View style={styles.devLabel}>
+              <View style={styles.devLabelDot} />
+              <Text style={styles.devLabelText}>DEV MODE</Text>
             </View>
-          </View>
-        </View>
-      )}
-        <View style={styles.devTopRow}>
-          <View style={styles.devLabel}>
-            <View style={styles.devLabelDot} />
-            <Text style={styles.devLabelText}>DEV MODE</Text>
-          </View>
-          <TouchableOpacity
-            style={[styles.devToolBtn, teleportMode && styles.devToolBtnActive]}
-            onPress={() => setTeleportMode((v) => !v)}
-          >
-            <Text style={styles.devToolText}>{teleportMode ? '✓ Tap map' : '📍 Teleport'}</Text>
-          </TouchableOpacity>
-          {spoofedLocation && (
-            <TouchableOpacity style={[styles.devToolBtn, styles.devToolBtnReset]} onPress={resetSpoof}>
-              <Text style={styles.devToolText}>🔄 Reset</Text>
+            <TouchableOpacity
+              style={[styles.devToolBtn, teleportMode && styles.devToolBtnActive]}
+              onPress={() => setTeleportMode((v) => !v)}
+            >
+              <Text style={styles.devToolText}>{teleportMode ? '✓ Tap map' : '📍 Teleport'}</Text>
             </TouchableOpacity>
-          )}
-        </View>
+            {spoofedLocation && (
+              <TouchableOpacity style={[styles.devToolBtn, styles.devToolBtnReset]} onPress={resetSpoof}>
+                <Text style={styles.devToolText}>🔄 Reset</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </>
       )}
 
       {navigating && navTarget && (
@@ -799,6 +934,49 @@ export default function MapScreen({ route, navigation }) {
                 <Text style={styles.sectionTitle}>About this staycation</Text>
                 <Text style={styles.detailDesc}>{detailProperty.description}</Text>
 
+                {/* Booking section */}
+                <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Book your stay</Text>
+                <View style={styles.dateRow}>
+                  <TouchableOpacity
+                    style={[styles.dateField, activeDateField === 'checkIn' && calendarOpen && styles.dateFieldActive]}
+                    onPress={() => { setActiveDateField('checkIn'); setCalendarOpen(true); }}
+                  >
+                    <Text style={styles.dateLabel}>Check-in</Text>
+                    <Text style={[styles.dateValue, !checkIn && styles.datePlaceholder]}>
+                      {checkIn ? formatDate(checkIn) : 'Add date'}
+                    </Text>
+                  </TouchableOpacity>
+                  <Text style={styles.dateArrow}>→</Text>
+                  <TouchableOpacity
+                    style={[styles.dateField, activeDateField === 'checkOut' && calendarOpen && styles.dateFieldActive]}
+                    onPress={() => {
+                      if (!checkIn) { setActiveDateField('checkIn'); setCalendarOpen(true); return; }
+                      setActiveDateField('checkOut');
+                      setCalendarOpen(true);
+                    }}
+                  >
+                    <Text style={styles.dateLabel}>Check-out</Text>
+                    <Text style={[styles.dateValue, !checkOut && styles.datePlaceholder]}>
+                      {checkOut ? formatDate(checkOut) : 'Add date'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {checkIn && checkOut && calcNights() > 0 && (
+                  <View style={styles.costSummary}>
+                    <View style={styles.costRow}>
+                      <Text style={styles.costLine}>{calcNights()} night{calcNights() !== 1 ? 's' : ''} × {detailProperty.price}</Text>
+                      <Text style={styles.costTotal}>₱{(calcNights() * detailProperty.pricePerNight).toLocaleString()}</Text>
+                    </View>
+                    {detailProperty.minNights > 1 && calcNights() < detailProperty.minNights && (
+                      <Text style={styles.minNightsWarn}>Minimum {detailProperty.minNights} nights required</Text>
+                    )}
+                  </View>
+                )}
+                {detailProperty.minNights > 1 && !(checkIn && checkOut) && (
+                  <Text style={styles.minNightsNote}>Minimum stay: {detailProperty.minNights} nights</Text>
+                )}
+
                 <View style={styles.divider} />
 
                 <Text style={styles.sectionTitle}>Host information</Text>
@@ -847,15 +1025,43 @@ export default function MapScreen({ route, navigation }) {
             <View style={styles.ctaWrap}>
               <TouchableOpacity style={styles.messageBtn} onPress={() => openChat(detailProperty)}>
                 <Text style={styles.messageBtnEmoji}>💬</Text>
-                <View>
-                  <Text style={styles.messageBtnText}>Message host</Text>
-                  <Text style={styles.messageBtnSub}>Chat to unlock OMW! navigation</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.messageBtnText}>
+                    {checkIn && checkOut && calcNights() > 0 ? 'Request to book' : 'Message host'}
+                  </Text>
+                  <Text style={styles.messageBtnSub}>
+                    {checkIn && checkOut && calcNights() > 0
+                      ? `${calcNights()} night${calcNights() !== 1 ? 's' : ''} · ₱${(calcNights() * detailProperty.pricePerNight).toLocaleString()} total`
+                      : 'Chat to unlock OMW! navigation'}
+                  </Text>
                 </View>
               </TouchableOpacity>
             </View>
           </SafeAreaView>
         )}
       </Modal>
+
+      <CalendarModal
+        visible={calendarOpen}
+        onClose={() => setCalendarOpen(false)}
+        title={activeDateField === 'checkIn' ? 'Check-in date' : 'Check-out date'}
+        selectedDate={activeDateField === 'checkIn' ? checkIn : checkOut}
+        rangeStart={checkIn}
+        rangeEnd={checkOut}
+        minimumDate={
+          activeDateField === 'checkIn'
+            ? new Date()
+            : (checkIn ? new Date(checkIn.getTime() + 86400000 * (detailProperty?.minNights || 1)) : new Date())
+        }
+        onSelect={(date) => {
+          if (activeDateField === 'checkIn') {
+            setCheckIn(date);
+            if (checkOut && checkOut <= date) setCheckOut(null);
+          } else {
+            setCheckOut(date);
+          }
+        }}
+      />
     </View>
   );
 }
@@ -994,4 +1200,17 @@ const styles = StyleSheet.create({
   messageBtnEmoji: { fontSize: 24 },
   messageBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
   messageBtnSub: { color: 'rgba(255,255,255,0.7)', fontSize: 11, marginTop: 2 },
+  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
+  dateField: { flex: 1, backgroundColor: '#111F35', borderWidth: 1, borderColor: '#1E3050', borderRadius: 12, padding: 12 },
+  dateFieldActive: { borderColor: '#4A9EFF' },
+  dateLabel: { color: '#8899AA', fontSize: 11, fontWeight: '600', marginBottom: 4 },
+  dateValue: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
+  datePlaceholder: { color: '#445566' },
+  dateArrow: { color: '#445566', fontSize: 18 },
+  costSummary: { backgroundColor: '#111F35', borderWidth: 1, borderColor: '#1E3050', borderRadius: 12, padding: 14, marginTop: 10 },
+  costRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  costLine: { color: '#8899AA', fontSize: 13 },
+  costTotal: { color: '#4A9EFF', fontSize: 16, fontWeight: '800' },
+  minNightsNote: { color: '#8899AA', fontSize: 11, marginTop: 8 },
+  minNightsWarn: { color: '#CC0000', fontSize: 11, marginTop: 6 },
 });

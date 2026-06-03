@@ -7,82 +7,90 @@ import { useState, useEffect, useRef } from 'react';
 
 const AUTO_RESPONSES = {
   1: {
-    greeting: "Hi! Thanks for your interest in the house. It's a great property near Katipunan — newly renovated with garage and garden. Feel free to ask me anything!",
+    greeting: "Hi! Thanks for checking out the Tagaytay cabin 🏔️ It's got a great Taal view and the fireplace is perfect for cold nights. What dates are you looking at?",
     responses: [
-      "Yes, the property is still available. When would you like to schedule a viewing?",
-      "Great question! The house has city water, Meralco electricity, and fiber-ready internet lines.",
-      "I'm flexible with viewings — weekends or weekdays after 4pm work best. Let me know what day suits you.",
-      "Price is negotiable for serious buyers. Feel free to drop by anytime!",
+      "Available pa! Just send me your check-in and check-out dates and I'll confirm right away.",
+      "The cabin fits up to 4 guests comfortably. Kitchen is fully stocked and WiFi is solid — around 50mbps.",
+      "Minimum 2 nights po. Check-in is 2pm, check-out 12nn. Early check-in possible if available!",
+      "No hidden fees — what you see is the nightly rate. Just message me when you're ready to book!",
     ],
   },
   2: {
-    greeting: "Hi po! Salamat for messaging. The condo is fully furnished and ready for move-in. Let me know what questions you have!",
+    greeting: "Hi po! Salamat for messaging. The BGC condo is available for staycation — 28th floor, city view talaga. What dates po kayo?",
     responses: [
-      "Still available po! Viewing can be arranged this week.",
-      "Utilities ay included na sa rent — water, association dues, pool access.",
-      "Yes po, pets are allowed up to 10kg. Additional deposit lang for pet.",
-      "Sure, I can show you the unit. Kailan ka free bumisita?",
+      "Available pa po! Pwede mag-check-in this week or weekend.",
+      "Netflix, WiFi, pool access — lahat included sa rate. No extra charges po.",
+      "Yes po, good for 2 guests. Good for couples or barkada ng dalawa lang 😊",
+      "Just send me the dates at i-confirm ko agad. Looking forward to hosting you!",
     ],
   },
   3: {
-    greeting: "Hello! Thank you for your interest in our Teachers Village property. This is a well-maintained family home in a quiet, secure neighborhood.",
+    greeting: "Hello! Thank you for your interest in the Baguio bungalow. It's a quiet pine forest retreat — perfect for rest and reset. How can I help you?",
     responses: [
-      "Yes, the property is currently available. I'd be happy to arrange a viewing at your convenience.",
-      "The lot is 200 sqm with floor area of 120 sqm across two floors. All bedrooms have built-in closets.",
-      "Clean title, updated tax declarations. Ready for immediate transfer upon closing.",
-      "I can meet you there today or tomorrow. Just let me know your preferred time.",
+      "The property is available for your chosen dates. Please send them over and I will confirm promptly.",
+      "The bungalow accommodates up to 6 guests. All bedrooms have thick blankets — Baguio nights can get cold!",
+      "Check-in is at 2pm. The property is fully prepared and check-in ready for every booking.",
+      "I am happy to answer any questions. Just let me know your preferred dates and I will take care of the rest.",
     ],
   },
   4: {
-    greeting: "Hey! Thanks for reaching out 😊 The studio is perfect if you're a student or young professional near UP. Lemme know what you wanna know!",
+    greeting: "Hey! 👋 La Union beachfront studio here — wala pang ibang naka-book this weekend! What dates are you eyeing?",
     responses: [
-      "Yes available pa! Ready for move-in this week.",
-      "Yup utilities included — wifi, water, electricity. No hidden fees!",
-      "Hehe sige I can give you a virtual tour first if you want, or you can just drop by. Both ok!",
-      "Just let me know when you're coming 🏠 I'll meet you there!",
+      "Available pa! Grab it na before may kumuha 🏄",
+      "Yup, beach access is right outside the door. WiFi medyo okay — good enough for WFH or streaming!",
+      "Good for 2 guests. Super chill vibe, perfect for a quick escape from the city 🌊",
+      "Just drop your dates and I'll confirm agad. See you soon!",
     ],
   },
   5: {
-    greeting: "Good day! I appreciate your interest in our Sikatuna Village property. This is a premium family home in one of QC's most prestigious villages.",
+    greeting: "Good day! Thank you for your interest in the Batangas villa. This is a premium private property with a pool — ideal for group getaways. How may I assist you?",
     responses: [
-      "The property is available. I'd like to personally accompany you on a viewing to show all the features.",
-      "Yes, clean title with all documents ready. I can provide the complete documentation during our meeting.",
-      "The village has 24/7 security, clubhouse, and is within walking distance of major schools.",
-      "I am available for a viewing this weekend. May I confirm a time that works for you?",
+      "The villa is available. Kindly send your preferred dates and number of guests so I can confirm availability.",
+      "The property accommodates up to 12 guests. The private pool, outdoor BBQ, and full kitchen are all included.",
+      "Minimum stay is 2 nights. The villa is fully serviced and check-in ready for every booking.",
+      "I am available to answer any questions. This is one of our most popular weekend retreat properties.",
     ],
   },
   6: {
-    greeting: "Hi! Condo is still available. Message me anytime for questions 🏠",
+    greeting: "Hi! Glamping tent available. Message me for dates 🏕️",
     responses: [
-      "Still available.",
-      "Sure, viewing ok. When?",
-      "Yes semi-furnished, aircon included.",
-      "Sige, meet tayo sa unit.",
+      "Available. What dates?",
+      "Good for 2. Breakfast included.",
+      "Yes, check-in 3pm. Check-out 11am.",
+      "Sige, send dates ko na i-confirm.",
     ],
   },
 };
 
 export default function ChatScreen({ route, navigation }) {
-  const { property } = route.params;
-  const seller = property.seller;
-  const sellerResponses = AUTO_RESPONSES[property.id] || AUTO_RESPONSES[1];
+  const { property, checkIn, checkOut, nights } = route.params;
+  const host = property.seller;
+  const hostResponses = AUTO_RESPONSES[property.id] || AUTO_RESPONSES[1];
+
+  const buildBookingMessage = () => {
+    if (!checkIn || !checkOut || !nights) return '';
+    const inDate = new Date(checkIn).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+    const outDate = new Date(checkOut).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+    const total = (nights * property.pricePerNight).toLocaleString();
+    return `Hi! I'd like to book from ${inDate} to ${outDate} (${nights} night${nights !== 1 ? 's' : ''}) — ₱${total} total. Is it available?`;
+  };
 
   const [messages, setMessages] = useState([
     {
       id: 1,
-      sender: 'seller',
-      text: sellerResponses.greeting,
+      sender: 'host',
+      text: hostResponses.greeting,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState(buildBookingMessage);
   const [responseIndex, setResponseIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [userMessageCount, setUserMessageCount] = useState(0);
-  const [sellerReplyCount, setSellerReplyCount] = useState(0);
+  const [hostReplyCount, setSellerReplyCount] = useState(0);
   const scrollRef = useRef(null);
 
-  const canUseOMW = userMessageCount >= 1 && sellerReplyCount >= 1;
+  const canUseOMW = userMessageCount >= 1 && hostReplyCount >= 1;
 
   useEffect(() => {
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
@@ -104,14 +112,14 @@ export default function ChatScreen({ route, navigation }) {
     setIsTyping(true);
 
     setTimeout(() => {
-      const reply = sellerResponses.responses[responseIndex % sellerResponses.responses.length];
-      const sellerMsg = {
+      const reply = hostResponses.responses[responseIndex % hostResponses.responses.length];
+      const hostMsg = {
         id: Date.now() + 1,
-        sender: 'seller',
+        sender: 'host',
         text: reply,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
-      setMessages((prev) => [...prev, sellerMsg]);
+      setMessages((prev) => [...prev, hostMsg]);
       setResponseIndex((i) => i + 1);
       setSellerReplyCount((c) => c + 1);
       setIsTyping(false);
@@ -137,11 +145,11 @@ export default function ChatScreen({ route, navigation }) {
         </TouchableOpacity>
         <View style={styles.headerAvatar}>
           <Text style={styles.headerAvatarText}>
-            {seller.name.split(' ').map((n) => n[0]).join('')}
+            {host.name.split(' ').map((n) => n[0]).join('')}
           </Text>
         </View>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerName}>{seller.name}</Text>
+          <Text style={styles.headerName}>{host.name}</Text>
           <View style={styles.headerStatus}>
             <View style={styles.onlineDot} />
             <Text style={styles.headerStatusText}>Online now</Text>

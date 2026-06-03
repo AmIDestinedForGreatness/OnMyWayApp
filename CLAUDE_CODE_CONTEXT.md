@@ -1,5 +1,10 @@
 # ON MY WAY! STAYCATION — CLAUDE CODE CONTEXT
 
+## 🔢 VERSION
+**Current: V.01** — First frontend version (Phase 1 base)
+- Each update/change increments by +0.1 (V.01 → V.02 → V.03...)
+- V.01: Core map, navigation, chat, profiles, SellScreen, all screens built and working
+
 ## 👤 USER PROFILE
 - **Name:** Yujin (PC username is "Marvin" — always call them Yujin)
 - **Age:** 20, 1st year IT student
@@ -15,22 +20,45 @@
 - Give exact file paths and copy-paste-ready code
 - Tell them where each piece of code goes (which file, which folder)
 - Push back on bad decisions — be a mentor, not a yes-man
-- Use Filipino cultural context when relevant
 - When they make typos or speak casually, understand the intent
 - Save files using `sv.` in VS Code
 
 ## 🎯 THE PRODUCT
 **"On My Way! Staycation"** — Map-first staycation rental app for Filipinos.
 
-**Tagline:** *"Tara, staycation! Find Filipino-owned rentals near you."*
+**Tagline:** *"On my way!"*
 
-**Target user:** Pinoys 22-35 booking weekend escapes (Tagaytay, Baguio, La Union, BGC condos, Antipolo, Batangas, Boracay, Siargao, Palawan).
+**Target user (Phase 1 MVP):** Students and young adults (Filipino or foreign) who need a rush/ASAP place to rent or stay — think "I need somewhere tonight", "I'm traveling for a uni event", "I need a place near campus this week." Budget-conscious, short stays, urgency-driven.
 
-**Core mechanic:** Pokemon GO-style map UX. Pin tap → property detail modal. Chat with host → unlock red OMW! button → 3D Waze-style navigation to property.
+**Long-term vision:** Become an entirely new Filipino-first buy/sell/rent marketplace — not just properties and staycations, but also items, vehicles, services, etc. Think: the local alternative to OLX (shut down 2023) and Carousell, but built for how Filipinos actually shop and transact (map-based, community-driven, Viber/FB-integrated).
+
+**STRATEGY NOTE — WEDGE FIRST:** Do NOT try to build a general marketplace from day one. OLX died going head-to-head with Facebook Marketplace. The winning move is: dominate the staycation/ASAP rental niche first (clear gap in the market, no strong local competitor) → build trust and user base → expand to vehicles, then items, then services. The staycation app is the foot in the door, not the full product.
+
+**Urgency UX implications:**
+- Availability status on listings ("Available tonight", "Available this weekend") matters a lot
+- Quick inquiry/booking flow is higher priority than deep browsing
+- Price range ₱500–₱3,500/night is the sweet spot for students
+- Near-me + "available now" filters are critical features
+
+**Core mechanic:** Three app inspirations combined:
+1. **Waze (navigation layer):** 3D camera tilt, blue polyline route, live GPS tracking while navigating to property. Eventually: full Waze-style navigation UI (turn-by-turn instructions panel, ETA, distance display while in navigation mode).
+2. **Carousell (marketplace layer):** Easy listing creation with photos + price, browse/search listings, bump/boost to push listing back to top. Reviews on listings. In-app purchases for boosts/bumps.
+3. **Facebook Communities (social layer):** Community-feel around listings — eventually: groups or feeds per area (e.g. "Tagaytay Staycations"), shares, comments. This is how Filipinos already discover rentals; bring that trust layer into the app.
+
+Pokémon GO-style map UX glues it all together: Pin tap → property detail modal. Chat with host → unlock red OMW! button → 3D Waze navigation to property.
 
 **NOT competing with:** Airbnb (foreign tourists), Lamudi (long-term sales), Carousell (general marketplace).
 
-**Revenue model:** Ads + boost listings only (Phase 1). No commissions — RA 9646 (RESA Law) requires broker license.
+**Revenue model:** Ads + boost listings + premium membership (Phase 1 UI, Phase 2 real payments). No commissions — RA 9646 (RESA Law) requires broker license.
+
+**Premium membership concept:**
+- Hosts pay a monthly/weekly subscription (e.g. ₱99–₱299/month)
+- Membership gives in-app currency (e.g. "OMW Coins")
+- Coins used to boost listings — boosts pin to top of search results and makes map pin larger/highlighted, even if property is far from the user
+- Boost tiers: e.g. 50 coins = 24hr boost, 200 coins = 7-day featured
+- Coins can also be purchased separately (à la carte)
+- Phase 1: build the UI (membership screen, coin balance, boost button in SellScreen) — non-functional/mock only
+- Phase 2: wire to real GCash/Maya/Stripe payments via backend
 
 ## 🏗️ TECH STACK
 - **Frontend:** React Native + Expo (managed workflow)
@@ -112,19 +140,23 @@ C:\Users\Marvin\Documents\OnMyWay\OnMyWayApp
 26. Staycation reframe complete: all language updated (host/guest, not seller/buyer)
 27. All screens use useSafeAreaInsets() for proper iPhone notch handling
 28. GitHub repo set up: https://github.com/AmIDestinedForGreatness/OnMyWayApp
+29. Date picker: custom CalendarModal (no extra package) — check-in/check-out in property detail modal
+30. Cost calculator: nights × nightly rate = total, shown inline with date picker
+31. Booking inquiry flow: "Message host" becomes "Request to book" when dates set; ChatScreen pre-fills inquiry message with dates + total
 
 ## 🐛 KNOWN BUGS (NOT YET FIXED)
 1. **Route loops during navigation** — OSRM sometimes returns weird looping path instead of clean road route. Root cause: sample properties are clustered in QC but user's real GPS may be far away, causing OSRM to find odd road connections.
 2. **Auto-teleport on first joystick move** — when joystick moves from real GPS position, it snaps near the sample property cluster. Partial fix applied (realLocationRef) but needs verification.
-3. **SignUpScreen navigates to Map** instead of Home after account creation — bug never fixed.
-4. **ChatScreen auto-responses** — still use old real estate language ("schedule a viewing", "clean title", "move-in ready"). Need staycation rewording (e.g. "available for the weekend", "check-in ready").
-5. **Speed slider width** — uses SLIDER_WIDTH constant that may mismatch after layout changes.
+3. ~~**SignUpScreen navigates to Map** instead of Home after account creation~~ — FIXED
+4. ~~**ChatScreen auto-responses** — old real estate language~~ — FIXED (all 6 host personalities rewritten with staycation language; seller → host rename in ChatScreen.js)
+5. ~~**Speed slider / dev toolbar orphaned JSX**~~ — FIXED (joystick + devTopRow now correctly wrapped in single `adminMode &&` Fragment)
 
 ## 📋 PHASE 1 REMAINING (Frontend Polish)
-- [ ] Date picker (check-in / check-out dates)
-- [ ] Nightly total cost calculator (nights × rate = total)
-- [ ] Booking inquiry flow (pick dates → auto-fills chat message to host)
+- [x] Date picker (check-in / check-out dates) — DONE: custom CalendarModal in MapScreen, no new package
+- [x] Nightly total cost calculator (nights × rate = total) — DONE: inline cost summary in booking section
+- [x] Booking inquiry flow (pick dates → auto-fills chat message to host) — DONE: ChatScreen pre-fills booking message
 - [ ] Amenities filter on map (pool, WiFi, pet-friendly, parking, beachfront, etc.)
+- [ ] Premium membership UI: membership screen, OMW Coins balance display, boost button in SellScreen (mock only — no real payments yet)
 - [ ] Fix all known bugs above
 
 ## 🗺️ FULL ROADMAP
@@ -136,13 +168,21 @@ Make app feel like a real staycation product before adding backend.
 - Migrate properties from in-memory to Supabase DB
 - Photo upload to Supabase Storage
 - Real chat (Supabase Realtime) replacing auto-replies
+- Premium membership payments (GCash/Maya/Stripe) + OMW Coins backend
+- Boost system: boosted listings float to top of search + enlarged map pin
 
 ### Phase 3 — Trust & Verification
 - Phone OTP verification
 - Host verification badge (selfie + ID upload, manual review)
 - Real review system (only verified bookings can review)
 
-### Phase 4 — Launch Prep
+### Phase 4 — Community & Social Layer
+- Area-based community feeds (e.g. "Tagaytay Staycations", "La Union Listings")
+- Comments/reactions on listings (Facebook marketplace feel)
+- Listing shares (to Facebook groups, Viber, etc.)
+- Full Waze-style navigation UI (turn-by-turn panel, ETA bar, distance display during active navigation)
+
+### Phase 5 — Launch Prep
 - Landing page (Vercel)
 - Android APK + iOS TestFlight
 - Onboard 5-10 real hosts, 50 beta users
@@ -194,6 +234,34 @@ cd C:\Users\Marvin\Documents\OnMyWay\OnMyWayApp
   "react-native-screens": "~4.16.0"
 }
 ```
+
+## 🤖 FOR CLAUDE (Session lifeline — read this first)
+
+**This file on GitHub (raw):** `https://raw.githubusercontent.com/AmIDestinedForGreatness/OnMyWayApp/main/CLAUDE_CODE_CONTEXT.md`
+Fetch via WebFetch at session start — do not rely on a local cached copy.
+
+### Behavior rules
+- React Native + Expo (managed workflow) only — no Next.js, no web patterns, no bare workflow features
+- State lives in `PropertiesContext` — no backend yet. Never suggest backend solutions for Phase 1 work.
+- Always use `useSafeAreaInsets()` for screen padding — never hardcode `paddingTop`
+- Readiness bar: **Medium** — ship working features, don't over-engineer. Phase 2 will reshape the backend entirely.
+
+### Testing
+- Yujin tests on **iPhone 12 via Expo Go** — iOS only
+- Always consider iOS-specific behavior: safe areas, scroll physics, navigation gestures
+- Expo Go limitation: custom native modules not supported — never suggest bare workflow changes
+- "Done" = Expo dev build launches without error + Yujin tests the affected flow on device
+
+### Deployment (future)
+- OTA updates → `expo publish` (Expo managed workflow)
+- App Store → EAS Build (Phase 2+, after backend is ready)
+
+### End of session checklist
+1. Push all changes to GitHub (`git add . → commit → push`)
+2. Update `## Last Session` in `C:\Users\Marvin\.claude\ForClaudeYujin.md`
+3. Sync ForClaudeYujin.md to the claude-context repo and push
+
+---
 
 ## 🏠 SAMPLE DATA (PropertiesContext.js)
 9 staycation listings all in QC coordinates (for dev/testing):

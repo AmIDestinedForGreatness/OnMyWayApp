@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useProperties } from '../context/PropertiesContext';
 
+const APP_VERSION = 'V.01';
+
 export default function HomeScreen({ navigation }) {
   const { user, adminMode, setAdminMode, myListings, reviewsReceived } = useProperties();
   const [loading, setLoading] = useState(true);
@@ -121,6 +123,8 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
 
       </ScrollView>
+
+      <Text style={[styles.versionBadge, { bottom: insets.bottom + 8 }]}>{APP_VERSION}</Text>
     </View>
   );
 }
@@ -161,4 +165,5 @@ const styles = StyleSheet.create({
   devSub: { fontSize: 11, color: '#8899AA', marginTop: 4, lineHeight: 16 },
   logout: { marginTop: 30, alignItems: 'center' },
   logoutText: { color: '#445566', fontSize: 13 },
+  versionBadge: { position: 'absolute', right: 16, color: '#445566', fontSize: 11 },
 });
