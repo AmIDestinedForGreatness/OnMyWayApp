@@ -1,9 +1,16 @@
 # ON MY WAY! STAYCATION — CLAUDE CODE CONTEXT
 
 ## 🔢 VERSION
-**Current: V.01** — First frontend version (Phase 1 base)
-- Each update/change increments by +0.1 (V.01 → V.02 → V.03...)
-- V.01: Core map, navigation, chat, profiles, SellScreen, all screens built and working
+**Current: V.1.1** — Phase 1, update 1
+
+**Versioning system:**
+- Phase 1 = V.1.x — each update within Phase 1 increments by +0.1 (V.1.1 → V.1.2 → ...)
+- Phase 2 = V.2.0 — only moves to V.2 when Yujin explicitly says so
+- Version is visible in the app (bottom-right badge on HomeScreen)
+
+**Changelog:**
+- V.1.0 (formerly V.01): Core map, navigation, chat, profiles, SellScreen, date picker, cost calculator, booking inquiry, all screens built and working
+- V.1.1: Amenities filter on map + detail modal display, Premium Membership UI (mock), OMW Coins balance (mock), Boost button in SellScreen, Membership screen, fix route looping bug, fix auto-teleport joystick bug
 
 ## 👤 USER PROFILE
 - **Name:** Yujin (PC username is "Marvin" — always call them Yujin)
@@ -145,19 +152,23 @@ C:\Users\Marvin\Documents\OnMyWay\OnMyWayApp
 31. Booking inquiry flow: "Message host" becomes "Request to book" when dates set; ChatScreen pre-fills inquiry message with dates + total
 
 ## 🐛 KNOWN BUGS (NOT YET FIXED)
-1. **Route loops during navigation** — OSRM sometimes returns weird looping path instead of clean road route. Root cause: sample properties are clustered in QC but user's real GPS may be far away, causing OSRM to find odd road connections.
-2. **Auto-teleport on first joystick move** — when joystick moves from real GPS position, it snaps near the sample property cluster. Partial fix applied (realLocationRef) but needs verification.
-3. ~~**SignUpScreen navigates to Map** instead of Home after account creation~~ — FIXED
-4. ~~**ChatScreen auto-responses** — old real estate language~~ — FIXED (all 6 host personalities rewritten with staycation language; seller → host rename in ChatScreen.js)
-5. ~~**Speed slider / dev toolbar orphaned JSX**~~ — FIXED (joystick + devTopRow now correctly wrapped in single `adminMode &&` Fragment)
+All known bugs resolved as of V.1.1.
+
+~~1. **Route loops during navigation**~~ — FIXED (V.1.1): Added 3× straight-line sanity check — if OSRM route is more than 3× the direct distance, it's discarded and straight-line fallback is used instead.
+~~2. **Auto-teleport on first joystick move**~~ — FIXED (V.1.1): Added `onPanResponderGrant` to seed spoofed location from real GPS on first touch, preventing snap to default QC coords.
+~~3. **SignUpScreen navigates to Map**~~ — FIXED
+~~4. **ChatScreen auto-responses — old real estate language**~~ — FIXED
+~~5. **Speed slider / dev toolbar orphaned JSX**~~ — FIXED
 
 ## 📋 PHASE 1 REMAINING (Frontend Polish)
-- [x] Date picker (check-in / check-out dates) — DONE: custom CalendarModal in MapScreen, no new package
-- [x] Nightly total cost calculator (nights × rate = total) — DONE: inline cost summary in booking section
-- [x] Booking inquiry flow (pick dates → auto-fills chat message to host) — DONE: ChatScreen pre-fills booking message
-- [ ] Amenities filter on map (pool, WiFi, pet-friendly, parking, beachfront, etc.)
-- [ ] Premium membership UI: membership screen, OMW Coins balance display, boost button in SellScreen (mock only — no real payments yet)
-- [ ] Fix all known bugs above
+- [x] Date picker (check-in / check-out dates) — DONE
+- [x] Nightly total cost calculator (nights × rate = total) — DONE
+- [x] Booking inquiry flow (pick dates → auto-fills chat message to host) — DONE
+- [x] Amenities filter on map — DONE (V.1.1): multi-select in search modal, filters listings by required amenities, amenities displayed in property detail modal
+- [x] Premium membership UI — DONE (V.1.1): MembershipScreen with OMW Coins balance, boost tiers, subscription plans (mock — no real payments); Boost button in SellScreen; Membership link in ProfileScreen
+- [x] Fix all known bugs — DONE (V.1.1)
+
+**Phase 1 is complete. Move to Phase 2 only when Yujin says so.**
 
 ## 🗺️ FULL ROADMAP
 ### Phase 1 — Frontend Polish (CURRENT)
@@ -258,7 +269,7 @@ Fetch via WebFetch at session start — do not rely on a local cached copy.
 
 ### End of session checklist
 1. Push all changes to GitHub (`git add . → commit → push`)
-2. Update `## Last Session` in `C:\Users\Marvin\.claude\ForClaudeYujin.md`
+2. Update `## Last Session` in `C:\Users\MARVIN-LI\.claude\ForClaudeYujin.md`
 3. Sync ForClaudeYujin.md to the claude-context repo and push
 
 ---
