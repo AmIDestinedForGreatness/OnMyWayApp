@@ -12,6 +12,7 @@ import SellScreen from './screens/SellScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import HelpScreen from './screens/HelpScreen';
+import MembershipScreen from './screens/MembershipScreen';
 
 const Stack = createStackNavigator();
 
@@ -31,6 +32,7 @@ export default function App() {
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen name="Help" component={HelpScreen} />
+          <Stack.Screen name="Membership" component={MembershipScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </PropertiesProvider>

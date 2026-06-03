@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useProperties } from '../context/PropertiesContext';
 
-const APP_VERSION = 'V.01';
+const APP_VERSION = 'V.1.1';
 
 export default function HomeScreen({ navigation }) {
   const { user, adminMode, setAdminMode, myListings, reviewsReceived } = useProperties();

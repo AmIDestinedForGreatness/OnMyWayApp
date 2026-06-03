@@ -141,6 +141,12 @@ export default function ProfileScreen({ navigation }) {
 
               {/* Settings + Help rows */}
               <View style={styles.menuCard}>
+                <TouchableOpacity style={styles.menuRow} onPress={() => navigation.navigate('Membership')}>
+                  <Text style={styles.menuIcon}>🪙</Text>
+                  <Text style={styles.menuLabel}>OMW Membership & Coins</Text>
+                  <Text style={styles.menuArrow}>→</Text>
+                </TouchableOpacity>
+                <View style={styles.menuDivider} />
                 <TouchableOpacity style={styles.menuRow} onPress={() => navigation.navigate('Settings')}>
                   <Text style={styles.menuIcon}>⚙️</Text>
                   <Text style={styles.menuLabel}>Settings</Text>

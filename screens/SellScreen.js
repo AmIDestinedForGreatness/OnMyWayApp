@@ -268,6 +268,11 @@ export default function SellScreen({ navigation }) {
             <Text style={styles.publishText}>Publish listing 🏖️</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity style={styles.boostBtn} onPress={() => navigation.navigate('Membership')}>
+            <Text style={styles.boostBtnText}>🚀 Boost this listing</Text>
+            <Text style={styles.boostBtnSub}>Get more visibility with OMW Coins</Text>
+          </TouchableOpacity>
+
           <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -311,4 +316,7 @@ const styles = StyleSheet.create({
   gridRow: { flexDirection: 'row', gap: 10 },
   publishBtn: { backgroundColor: '#4A9EFF', paddingVertical: 16, borderRadius: 14, alignItems: 'center', marginTop: 30 },
   publishText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
+  boostBtn: { backgroundColor: '#111F35', borderWidth: 1, borderColor: '#0F6E56', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20, alignItems: 'center', marginTop: 12 },
+  boostBtnText: { color: '#1D9E75', fontSize: 15, fontWeight: '800' },
+  boostBtnSub: { color: '#445566', fontSize: 11, marginTop: 3 },
 });

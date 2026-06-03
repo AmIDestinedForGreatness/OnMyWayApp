@@ -223,6 +223,8 @@ export function PropertiesProvider({ children }) {
   const [user, setUser] = useState(DEFAULT_USER);
   const [reviewsReceived] = useState([]);
   const [reviewsGiven] = useState([]);
+  const [omwCoins, setOmwCoins] = useState(0);
+  const [membershipTier, setMembershipTier] = useState('free'); // 'free' | 'basic' | 'pro'
 
   const addProperty = (newProp) => {
     const id = Math.max(...properties.map(p => p.id), 0) + 1;
@@ -256,6 +258,8 @@ export function PropertiesProvider({ children }) {
       user, updateUser,
       reviewsReceived, reviewsGiven,
       myListings,
+      omwCoins, setOmwCoins,
+      membershipTier, setMembershipTier,
     }}>
       {children}
     </PropertiesContext.Provider>

@@ -6,7 +6,7 @@ import MapView, { Marker, PROVIDER_DEFAULT, UrlTile, Polyline } from 'react-nati
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
-import { useProperties } from '../context/PropertiesContext';
+import { useProperties, AMENITIES_LIST } from '../context/PropertiesContext';
 
 const { width } = Dimensions.get('window');
 const MAP_TILE_URL = 'https://cartodb-basemaps-a.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png';
@@ -269,6 +269,7 @@ export default function MapScreen({ route, navigation }) {
   const [filterDistance, setFilterDistance] = useState(DISTANCE_FILTERS[0]);
   const [filterSqm, setFilterSqm] = useState(SQM_FILTERS[0]);
   const [sortBy, setSortBy] = useState('nearest');
+  const [filterAmenities, setFilterAmenities] = useState([]);
   const [speedMultiplier, setSpeedMultiplier] = useState(1.0); // 0.2 (slow) to 3.0 (fast)
   const [sliderX, setSliderX] = useState(SLIDER_WIDTH * 0.27); // visual position
   const [gpsFocused, setGpsFocused] = useState(false);
@@ -308,7 +309,8 @@ export default function MapScreen({ route, navigation }) {
     (filterRent.label !== 'Any' ? 1 : 0) +
     (filterDistance.value !== Infinity ? 1 : 0) +
     (filterSqm.min > 0 ? 1 : 0) +
-    (searchText.trim() ? 1 : 0)
+    (searchText.trim() ? 1 : 0) +
+    (filterAmenities.length > 0 ? 1 : 0)
   );
 
   const sortedProperties = useMemo(() => {
@@ -340,6 +342,7 @@ export default function MapScreen({ route, navigation }) {
     });
     if (filterDistance.value !== Infinity) list = list.filter(p => p.distance !== undefined && p.distance <= filterDistance.value);
     if (filterSqm.min > 0) list = list.filter(p => p.sqm >= filterSqm.min);
+    if (filterAmenities.length > 0) list = list.filter(p => filterAmenities.every(a => p.amenities && p.amenities.includes(a)));
 
     if (sortBy === 'nearest') list.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
     else if (sortBy === 'priceLow') list.sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
@@ -347,12 +350,13 @@ export default function MapScreen({ route, navigation }) {
     else if (sortBy === 'sqm') list.sort((a, b) => b.sqm - a.sqm);
 
     return list;
-  }, [locationLat, locationLng, properties, searchText, filterType, filterListing, filterPrice, filterRent, filterDistance, filterSqm, sortBy]);
+  }, [locationLat, locationLng, properties, searchText, filterType, filterListing, filterPrice, filterRent, filterDistance, filterSqm, sortBy, filterAmenities]);
 
   const resetFilters = () => {
     setSearchText(''); setFilterType('All'); setFilterListing('all');
     setFilterPrice(PRICE_RANGES[0]); setFilterRent(RENT_RANGES[0]);
     setFilterDistance(DISTANCE_FILTERS[0]); setFilterSqm(SQM_FILTERS[0]); setSortBy('nearest');
+    setFilterAmenities([]);
   };
 
   useEffect(() => {
@@ -424,6 +428,15 @@ export default function MapScreen({ route, navigation }) {
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        // Seed spoofed location from real GPS on first touch — prevents snap to default coords
+        setSpoofedLocation(prev => {
+          if (prev) return prev;
+          const loc = realLocationRef.current;
+          if (!loc) return prev;
+          return { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+        });
+      },
       onPanResponderMove: (_, g) => {
         const radius = 50;
         const dist = Math.sqrt(g.dx ** 2 + g.dy ** 2);
@@ -494,6 +507,12 @@ export default function MapScreen({ route, navigation }) {
       const data = await res.json();
       if (data.routes && data.routes.length > 0) {
         const r = data.routes[0];
+        // Sanity check: discard route if it's 3x+ longer than straight-line (looping path)
+        if (r.distance > directDist * 3) {
+          console.log('[Route] OSRM route looks looped, using straight line');
+          setLoadingRoute(false);
+          return straight;
+        }
         const coords = r.geometry.coordinates.map((c) => ({ latitude: c[1], longitude: c[0] }));
         setRouteCoords(coords);
         setRouteInfo({ distance: r.distance, duration: r.duration });
@@ -873,6 +892,20 @@ export default function MapScreen({ route, navigation }) {
               ))}
             </View>
 
+            <Text style={styles.filterLabel}>Amenities</Text>
+            <Text style={{ color: '#445566', fontSize: 12, marginBottom: 10 }}>Show only listings that have all selected amenities</Text>
+            <View style={styles.chipGrid}>
+              {AMENITIES_LIST.map(a => (
+                <TouchableOpacity
+                  key={a}
+                  style={[styles.filterChip, filterAmenities.includes(a) && styles.filterChipActive]}
+                  onPress={() => setFilterAmenities(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a])}
+                >
+                  <Text style={[styles.filterChipText, filterAmenities.includes(a) && styles.filterChipTextActive]}>{a}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
             <View style={{ height: 40 }} />
           </ScrollView>
 
@@ -931,7 +964,20 @@ export default function MapScreen({ route, navigation }) {
                   <View style={styles.detailTag}><Text style={styles.detailTagText}>{detailProperty.sqm} sqm</Text></View>
                 </View>
 
-                <Text style={styles.sectionTitle}>About this staycation</Text>
+                {detailProperty.amenities && detailProperty.amenities.length > 0 && (
+                  <>
+                    <Text style={[styles.sectionTitle, { marginTop: 16 }]}>What's included</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                      {detailProperty.amenities.map(a => (
+                        <View key={a} style={styles.amenityTag}>
+                          <Text style={styles.amenityTagText}>✓ {a}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </>
+                )}
+
+                <Text style={[styles.sectionTitle, { marginTop: 16 }]}>About this staycation</Text>
                 <Text style={styles.detailDesc}>{detailProperty.description}</Text>
 
                 {/* Booking section */}
@@ -1213,4 +1259,6 @@ const styles = StyleSheet.create({
   costTotal: { color: '#4A9EFF', fontSize: 16, fontWeight: '800' },
   minNightsNote: { color: '#8899AA', fontSize: 11, marginTop: 8 },
   minNightsWarn: { color: '#CC0000', fontSize: 11, marginTop: 6 },
+  amenityTag: { backgroundColor: '#111F35', borderWidth: 1, borderColor: '#1E3050', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 },
+  amenityTagText: { color: '#1D9E75', fontSize: 12, fontWeight: '600' },
 });
