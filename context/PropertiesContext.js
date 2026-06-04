@@ -246,6 +246,14 @@ export function PropertiesProvider({ children }) {
   const [omwCoins, setOmwCoins] = useState(0);
   const [membershipTier, setMembershipTier] = useState('free'); // 'free' | 'basic' | 'pro'
 
+  const updateProperty = (id, updates) => {
+    setProperties(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  const deleteProperty = (id) => {
+    setProperties(prev => prev.filter(p => p.id !== id));
+  };
+
   const addProperty = (newProp) => {
     const id = Math.max(...properties.map(p => p.id), 0) + 1;
     const propWithUser = {
@@ -272,7 +280,7 @@ export function PropertiesProvider({ children }) {
 
   return (
     <PropertiesContext.Provider value={{
-      properties, addProperty,
+      properties, addProperty, updateProperty, deleteProperty,
       adminMode, setAdminMode,
       spoofedLocation, setSpoofedLocation,
       user, updateUser,

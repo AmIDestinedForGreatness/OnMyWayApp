@@ -1,6 +1,6 @@
 import {
   StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView,
-  TextInput, Image, Alert, KeyboardAvoidingView, Platform
+  TextInput, Image, Alert, KeyboardAvoidingView, Platform, Modal
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
@@ -9,9 +9,15 @@ import * as ImagePicker from 'expo-image-picker';
 import { useProperties } from '../context/PropertiesContext';
 
 export default function ProfileScreen({ navigation }) {
-  const { user, updateUser, myListings, reviewsReceived, reviewsGiven } = useProperties();
+  const { user, updateUser, myListings, reviewsReceived, reviewsGiven, updateProperty, deleteProperty } = useProperties();
   const [editing, setEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('listings');
+  const [actionListing, setActionListing] = useState(null);
+  const [editListing, setEditListing] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editPrice, setEditPrice] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editDesc, setEditDesc] = useState('');
   const [name, setName] = useState(user.displayName);
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.phone);
@@ -186,13 +192,25 @@ export default function ProfileScreen({ navigation }) {
                     </View>
                   ) : (
                     myListings.map((p) => (
-                      <View key={p.id} style={styles.listingItem}>
+                      <TouchableOpacity key={p.id} style={styles.listingItem} onPress={() => setActionListing(p)} activeOpacity={0.75}>
                         {p.photos && p.photos[0] && (
                           <Image source={p.photos[0]} style={styles.listingPhoto} />
                         )}
                         <View style={{ flex: 1 }}>
-                          <View style={styles.listingBadge}>
-                            <Text style={styles.listingBadgeText}>STAYCATION</Text>
+                          <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+                            <View style={styles.listingBadge}>
+                              <Text style={styles.listingBadgeText}>STAYCATION</Text>
+                            </View>
+                            {p.status === 'reserved' && (
+                              <View style={[styles.listingBadge, { backgroundColor: '#CC7700' }]}>
+                                <Text style={styles.listingBadgeText}>RESERVED</Text>
+                              </View>
+                            )}
+                            {p.status === 'booked' && (
+                              <View style={[styles.listingBadge, { backgroundColor: '#CC0000' }]}>
+                                <Text style={styles.listingBadgeText}>BOOKED</Text>
+                              </View>
+                            )}
                           </View>
                           <Text style={styles.listingPrice}>{p.price}</Text>
                           <Text style={styles.listingTitle} numberOfLines={1}>{p.title}</Text>
@@ -204,7 +222,7 @@ export default function ProfileScreen({ navigation }) {
                             <Text style={styles.boostListingText}>🚀 Boost listing</Text>
                           </TouchableOpacity>
                         </View>
-                      </View>
+                      </TouchableOpacity>
                     ))
                   )
                 )}
@@ -255,6 +273,90 @@ export default function ProfileScreen({ navigation }) {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Action sheet */}
+      <Modal visible={!!actionListing} transparent animationType="slide" onRequestClose={() => setActionListing(null)}>
+        <TouchableOpacity style={styles.sheetOverlay} activeOpacity={1} onPress={() => setActionListing(null)}>
+          <View style={styles.sheetContainer}>
+            <Text style={styles.sheetTitle}>What would you like to do?</Text>
+            <TouchableOpacity style={styles.sheetOption} onPress={() => {
+              const l = actionListing;
+              setActionListing(null);
+              setEditTitle(l.title);
+              setEditPrice(String(l.pricePerNight));
+              setEditAddress(l.address);
+              setEditDesc(l.description || '');
+              setEditListing(l);
+            }}>
+              <Text style={styles.sheetOptionText}>Edit listing details</Text>
+            </TouchableOpacity>
+            <View style={styles.sheetDivider} />
+            <TouchableOpacity style={styles.sheetOption} onPress={() => {
+              updateProperty(actionListing.id, { status: 'reserved' });
+              setActionListing(null);
+            }}>
+              <Text style={styles.sheetOptionText}>Mark as Reserved</Text>
+            </TouchableOpacity>
+            <View style={styles.sheetDivider} />
+            <TouchableOpacity style={styles.sheetOption} onPress={() => {
+              updateProperty(actionListing.id, { status: 'booked' });
+              setActionListing(null);
+            }}>
+              <Text style={styles.sheetOptionText}>Mark as Booked</Text>
+            </TouchableOpacity>
+            <View style={styles.sheetDivider} />
+            <TouchableOpacity style={styles.sheetOption} onPress={() => {
+              const id = actionListing.id;
+              setActionListing(null);
+              Alert.alert('Delete listing', 'This will remove your listing from the map. Sure?', [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: () => deleteProperty(id) },
+              ]);
+            }}>
+              <Text style={[styles.sheetOptionText, { color: '#FF4444' }]}>Delete listing</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.sheetCancel} onPress={() => setActionListing(null)}>
+            <Text style={styles.sheetCancelText}>Cancel</Text>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Edit listing modal */}
+      <Modal visible={!!editListing} animationType="slide" onRequestClose={() => setEditListing(null)}>
+        <View style={[styles.container, { paddingTop: insets.top }]}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => setEditListing(null)}>
+              <Text style={styles.backText}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Edit listing</Text>
+            <TouchableOpacity onPress={() => {
+              const price = parseInt(editPrice.replace(/[^0-9]/g, '')) || 0;
+              updateProperty(editListing.id, {
+                title: editTitle.trim(),
+                pricePerNight: price,
+                price: `₱${price.toLocaleString()}/night`,
+                address: editAddress.trim(),
+                description: editDesc.trim(),
+              });
+              setEditListing(null);
+              Alert.alert('Saved ✓', 'Your listing has been updated.');
+            }}>
+              <Text style={styles.saveText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView contentContainerStyle={{ padding: 20 }} keyboardShouldPersistTaps="handled">
+            <Text style={styles.label}>Title</Text>
+            <TextInput style={styles.input} value={editTitle} onChangeText={setEditTitle} placeholderTextColor="#445566" maxLength={60} />
+            <Text style={styles.label}>Nightly rate (₱)</Text>
+            <TextInput style={styles.input} value={editPrice} onChangeText={v => setEditPrice(v.replace(/[^0-9]/g, ''))} keyboardType="number-pad" placeholderTextColor="#445566" />
+            <Text style={styles.label}>Address</Text>
+            <TextInput style={styles.input} value={editAddress} onChangeText={setEditAddress} placeholderTextColor="#445566" />
+            <Text style={styles.label}>Description</Text>
+            <TextInput style={[styles.input, styles.textArea]} value={editDesc} onChangeText={setEditDesc} multiline numberOfLines={5} maxLength={400} placeholderTextColor="#445566" />
+          </ScrollView>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -319,6 +421,14 @@ const styles = StyleSheet.create({
   listingAddr: { color: '#4A9EFF', fontSize: 11, marginTop: 4 },
   boostListingBtn: { marginTop: 8, backgroundColor: '#111F35', borderWidth: 1, borderColor: '#0F6E56', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, alignSelf: 'flex-start' },
   boostListingText: { color: '#1D9E75', fontSize: 11, fontWeight: '700' },
+  sheetOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.55)', padding: 10, gap: 8 },
+  sheetContainer: { backgroundColor: '#1C1C1E', borderRadius: 14, overflow: 'hidden' },
+  sheetTitle: { color: '#8899AA', fontSize: 13, textAlign: 'center', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#2C2C2E' },
+  sheetOption: { paddingVertical: 18, alignItems: 'center' },
+  sheetOptionText: { color: '#FFFFFF', fontSize: 17 },
+  sheetDivider: { height: 1, backgroundColor: '#2C2C2E' },
+  sheetCancel: { backgroundColor: '#1C1C1E', borderRadius: 14, paddingVertical: 18, alignItems: 'center' },
+  sheetCancelText: { color: '#4A9EFF', fontSize: 17, fontWeight: '700' },
   reviewCard: { backgroundColor: '#111F35', borderWidth: 1, borderColor: '#1E3050', borderRadius: 12, padding: 14, marginBottom: 10 },
   reviewTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
   reviewUser: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
