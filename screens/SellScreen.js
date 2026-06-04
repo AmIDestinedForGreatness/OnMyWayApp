@@ -1,12 +1,12 @@
 import {
   StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView,
-  SafeAreaView, Image, Alert, KeyboardAvoidingView, Platform
+  SafeAreaView, Image, Alert, KeyboardAvoidingView, Platform, Modal
 } from 'react-native';
+import MapView, { Marker, PROVIDER_DEFAULT, UrlTile } from 'react-native-maps';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
 import { useProperties } from '../context/PropertiesContext';
 import { PROPERTY_TYPES, AMENITIES_LIST } from '../context/PropertiesContext';
 
@@ -28,6 +28,8 @@ export default function SellScreen({ navigation }) {
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [minNights, setMinNights] = useState('1');
   const [maxGuests, setMaxGuests] = useState('4');
+  const [pickedCoord, setPickedCoord] = useState({ latitude: 14.6560, longitude: 121.0540 });
+  const [locationPickerVisible, setLocationPickerVisible] = useState(false);
 
   const toggleAmenity = (amenity) => {
     setSelectedAmenities(prev =>
@@ -62,15 +64,8 @@ export default function SellScreen({ navigation }) {
     if (!pricePerNight.trim()) return Alert.alert('Missing price', 'Please enter your nightly rate.');
     if (!address.trim()) return Alert.alert('Missing address', 'Please enter the location of your space.');
 
-    let lat = 14.6560, lng = 121.0540;
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
-        const loc = await Location.getCurrentPositionAsync({});
-        lat = loc.coords.latitude + (Math.random() - 0.5) * 0.002;
-        lng = loc.coords.longitude + (Math.random() - 0.5) * 0.002;
-      }
-    } catch (e) {}
+    const lat = pickedCoord.latitude;
+    const lng = pickedCoord.longitude;
 
     const price = parseInt(pricePerNight.replace(/[^0-9]/g, ''), 10) || 0;
 
@@ -233,6 +228,10 @@ export default function SellScreen({ navigation }) {
             placeholder="e.g. San Juan, La Union"
             placeholderTextColor="#445566"
           />
+          <TouchableOpacity style={styles.mapPickerBtn} onPress={() => setLocationPickerVisible(true)}>
+            <Text style={styles.mapPickerBtnText}>📍 Set pin location on map</Text>
+            <Text style={styles.mapPickerCoord}>{pickedCoord.latitude.toFixed(5)}, {pickedCoord.longitude.toFixed(5)}</Text>
+          </TouchableOpacity>
 
           {/* Amenities */}
           <Text style={styles.sectionTitle}>Amenities</Text>
@@ -276,6 +275,38 @@ export default function SellScreen({ navigation }) {
           <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal visible={locationPickerVisible} animationType="slide" onRequestClose={() => setLocationPickerVisible(false)}>
+        <View style={{ flex: 1, backgroundColor: '#0A1628' }}>
+          <View style={styles.pickerHeader}>
+            <TouchableOpacity onPress={() => setLocationPickerVisible(false)}>
+              <Text style={styles.pickerCancelText}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={styles.pickerTitle}>Tap map to place pin</Text>
+            <TouchableOpacity onPress={() => setLocationPickerVisible(false)}>
+              <Text style={styles.pickerDoneText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+          <MapView
+            style={{ flex: 1 }}
+            provider={PROVIDER_DEFAULT}
+            initialRegion={{
+              latitude: pickedCoord.latitude,
+              longitude: pickedCoord.longitude,
+              latitudeDelta: 0.012,
+              longitudeDelta: 0.012,
+            }}
+            onPress={(e) => setPickedCoord(e.nativeEvent.coordinate)}
+          >
+            <UrlTile urlTemplate="https://cartodb-basemaps-a.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png" maximumZ={19} flipY={false} tileSize={256} opacity={0.99} />
+            <Marker coordinate={pickedCoord} pinColor="#4A9EFF" />
+          </MapView>
+          <View style={styles.pickerFooter}>
+            <Text style={styles.pickerCoordDisplay}>📍 {pickedCoord.latitude.toFixed(5)}, {pickedCoord.longitude.toFixed(5)}</Text>
+            <Text style={styles.pickerHint}>Tap anywhere on the map to move the pin</Text>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -319,4 +350,14 @@ const styles = StyleSheet.create({
   boostBtn: { backgroundColor: '#111F35', borderWidth: 1, borderColor: '#0F6E56', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20, alignItems: 'center', marginTop: 12 },
   boostBtnText: { color: '#1D9E75', fontSize: 15, fontWeight: '800' },
   boostBtnSub: { color: '#445566', fontSize: 11, marginTop: 3 },
+  mapPickerBtn: { marginTop: 10, backgroundColor: '#111F35', borderWidth: 1, borderColor: '#4A9EFF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 14 },
+  mapPickerBtnText: { color: '#4A9EFF', fontSize: 14, fontWeight: '700' },
+  mapPickerCoord: { color: '#445566', fontSize: 11, marginTop: 4 },
+  pickerHeader: { backgroundColor: '#0A1628', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 16, paddingTop: 54, borderBottomWidth: 1, borderBottomColor: '#1E3050' },
+  pickerTitle: { color: '#FFFFFF', fontSize: 14, fontWeight: '700', flex: 1, textAlign: 'center' },
+  pickerCancelText: { color: '#8899AA', fontSize: 15, width: 55 },
+  pickerDoneText: { color: '#4A9EFF', fontSize: 15, fontWeight: '700', width: 55, textAlign: 'right' },
+  pickerFooter: { backgroundColor: '#0A1628', padding: 16, alignItems: 'center', borderTopWidth: 1, borderTopColor: '#1E3050' },
+  pickerCoordDisplay: { color: '#4A9EFF', fontSize: 13, fontWeight: '700', marginBottom: 4 },
+  pickerHint: { color: '#8899AA', fontSize: 12 },
 });

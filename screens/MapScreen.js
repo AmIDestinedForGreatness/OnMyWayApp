@@ -63,6 +63,28 @@ function getBearing(lat1, lon1, lat2, lon2) {
   return (toDeg(Math.atan2(y, x)) + 360) % 360;
 }
 
+function getRouteArrows(coords) {
+  if (coords.length < 2) return [];
+  if (coords.length === 2) {
+    return [{
+      coordinate: {
+        latitude: (coords[0].latitude + coords[1].latitude) / 2,
+        longitude: (coords[0].longitude + coords[1].longitude) / 2,
+      },
+      rotation: getBearing(coords[0].latitude, coords[0].longitude, coords[1].latitude, coords[1].longitude),
+    }];
+  }
+  const arrows = [];
+  const step = Math.max(2, Math.floor(coords.length / 5));
+  for (let i = step; i < coords.length - 1; i += step) {
+    arrows.push({
+      coordinate: coords[i],
+      rotation: getBearing(coords[i - 1].latitude, coords[i - 1].longitude, coords[i].latitude, coords[i].longitude),
+    });
+  }
+  return arrows;
+}
+
 function parsePrice(priceStr) {
   const num = priceStr.replace(/[^0-9]/g, '');
   return parseInt(num, 10) || 0;
@@ -651,6 +673,21 @@ export default function MapScreen({ route, navigation }) {
           <>
             <Polyline coordinates={routeCoords} strokeColor="#FFFFFF" strokeWidth={12} lineCap="round" lineJoin="round" zIndex={50} />
             <Polyline coordinates={routeCoords} strokeColor="#2563EB" strokeWidth={7} lineCap="round" lineJoin="round" zIndex={51} />
+            {getRouteArrows(routeCoords).map((arrow, idx) => (
+              <Marker
+                key={`arr-${idx}`}
+                coordinate={arrow.coordinate}
+                anchor={{ x: 0.5, y: 0.5 }}
+                rotation={arrow.rotation}
+                flat
+                zIndex={52}
+                tracksViewChanges={false}
+              >
+                <View style={styles.routeArrow}>
+                  <Text style={styles.routeArrowText}>▲</Text>
+                </View>
+              </Marker>
+            ))}
           </>
         )}
       </MapView>
@@ -1261,4 +1298,6 @@ const styles = StyleSheet.create({
   minNightsWarn: { color: '#CC0000', fontSize: 11, marginTop: 6 },
   amenityTag: { backgroundColor: '#111F35', borderWidth: 1, borderColor: '#1E3050', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 },
   amenityTagText: { color: '#1D9E75', fontSize: 12, fontWeight: '600' },
+  routeArrow: { width: 22, height: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(37,99,235,0.9)', borderRadius: 11 },
+  routeArrowText: { color: '#FFFFFF', fontSize: 10, fontWeight: '900' },
 });

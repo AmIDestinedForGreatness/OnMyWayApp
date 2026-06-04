@@ -197,6 +197,12 @@ export default function ProfileScreen({ navigation }) {
                           <Text style={styles.listingPrice}>{p.price}</Text>
                           <Text style={styles.listingTitle} numberOfLines={1}>{p.title}</Text>
                           <Text style={styles.listingAddr} numberOfLines={1}>📍 {p.address}</Text>
+                          <TouchableOpacity
+                            style={styles.boostListingBtn}
+                            onPress={() => navigation.navigate('Membership')}
+                          >
+                            <Text style={styles.boostListingText}>🚀 Boost listing</Text>
+                          </TouchableOpacity>
                         </View>
                       </View>
                     ))
@@ -311,6 +317,8 @@ const styles = StyleSheet.create({
   listingPrice: { color: '#FFFFFF', fontSize: 15, fontWeight: '800', marginTop: 4 },
   listingTitle: { color: '#8899AA', fontSize: 12, marginTop: 2 },
   listingAddr: { color: '#4A9EFF', fontSize: 11, marginTop: 4 },
+  boostListingBtn: { marginTop: 8, backgroundColor: '#111F35', borderWidth: 1, borderColor: '#0F6E56', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, alignSelf: 'flex-start' },
+  boostListingText: { color: '#1D9E75', fontSize: 11, fontWeight: '700' },
   reviewCard: { backgroundColor: '#111F35', borderWidth: 1, borderColor: '#1E3050', borderRadius: 12, padding: 14, marginBottom: 10 },
   reviewTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
   reviewUser: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
