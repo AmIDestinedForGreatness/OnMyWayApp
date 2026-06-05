@@ -14,9 +14,9 @@ Project instructions and session state for Claude Code. Read this before touchin
 - Version badge visible in app — `APP_VERSION` constant in `HomeScreen.js`, also in `app.json`
 
 **Changelog:**
-- V.1.0: Core map, navigation, chat, profiles, SellScreen, date picker, cost calculator, booking inquiry — all screens built and working
-- V.1.1: Amenities filter, Premium Membership UI (mock), OMW Coins (mock), Boost button, bug fixes (route loop + joystick teleport)
-- V.1.2: Direction arrows on route polyline, Boost button in Profile → MembershipScreen, map location picker in SellScreen (tap-to-place), test listing id:10, listing management in Profile (action sheet, edit modal, RESERVED/BOOKED badges, delete), updateProperty + deleteProperty in PropertiesContext
+- V.1.0: Core map, navigation, chat, profiles, SellScreen, date picker, cost calculator, booking inquiry — all screens built and working [Personal PC]
+- V.1.1: Amenities filter, Premium Membership UI (mock), OMW Coins (mock), Boost button, bug fixes (route loop + joystick teleport) [Mom's PC]
+- V.1.2: Direction arrows on route polyline, Boost button in Profile → MembershipScreen, map location picker in SellScreen (tap-to-place), test listing id:10, listing management in Profile (action sheet, edit modal, RESERVED/BOOKED badges, delete), updateProperty + deleteProperty in PropertiesContext [Mom's PC]
 
 ---
 
