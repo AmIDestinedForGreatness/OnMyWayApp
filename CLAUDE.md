@@ -95,7 +95,8 @@ Target user: students and young adults who need a place ASAP — "I need somewhe
 ## Project structure
 
 ```
-C:\Users\MARVIN-LI\Documents\OnMyWay\OnMyWayApp
+Personal PC:  C:\Users\Marvin\Documents\OnMyWay\OnMyWayApp
+Mom's PC:     C:\Users\MARVIN-LI\Documents\OnMyWay\OnMyWayApp
 ├── App.js                    (Navigation + PropertiesProvider wrapper)
 ├── app.json
 ├── CLAUDE.md                 (this file)
@@ -225,7 +226,8 @@ Amenities: WiFi, Pool, Parking, Kitchen, BBQ Grill, Pet-friendly, Beach Access, 
 ```bash
 npx expo start --lan --clear   # start dev server
 git add . && git commit -m "..." && git push
-cd C:\Users\MARVIN-LI\Documents\OnMyWay\OnMyWayApp
+cd C:\Users\Marvin\Documents\OnMyWay\OnMyWayApp        # Personal PC
+cd C:\Users\MARVIN-LI\Documents\OnMyWay\OnMyWayApp    # Mom's PC
 ```
 
 ---
@@ -240,4 +242,6 @@ Fetch via WebFetch at session start when not already in this project directory.
 ### Session end checklist
 1. Push all changes to GitHub
 2. Update this file — version, features, bugs, last session notes
-3. Update `## Last Session` in `C:\Users\MARVIN-LI\.claude\ForClaudeYujin.md` and push to claude-context repo
+3. Update `## Last Session` in ForClaudeYujin.md and push to claude-context repo
+   - Personal PC: `C:\Users\Marvin\.claude\ForClaudeYujin.md`
+   - Mom's PC: `C:\Users\MARVIN-LI\.claude\ForClaudeYujin.md`
