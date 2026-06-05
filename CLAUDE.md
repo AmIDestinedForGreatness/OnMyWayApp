@@ -242,6 +242,9 @@ cd C:\Users\MARVIN-LI\Documents\OnMyWay\OnMyWayApp    # Mom's PC
 
 ## For Claude — session lifeline
 
+**Master brain (read this first, before this file):**
+`ForClaudeYujin.md` — lives at `C:\Users\Marvin\.claude\ForClaudeYujin.md` (Personal PC) or `C:\Users\MARVIN-LI\.claude\ForClaudeYujin.md` (Mom's PC). Also in the private claude-context GitHub repo. This is the single source of truth for everything — who Yujin is, all projects, all rules, all session history. This file (CLAUDE.md) is supplementary. Anything important decided this session must be stored in ForClaudeYujin.md, not only here.
+
 **This file on GitHub (raw):**
 `https://raw.githubusercontent.com/AmIDestinedForGreatness/OnMyWayApp/main/CLAUDE.md`
 
