@@ -194,8 +194,9 @@ All resolved as of V.1.1.
 - [x] Amenities filter on map
 - [x] Premium membership UI (mock)
 - [x] All bugs fixed
+- [ ] Full iPhone 12 test pass — V.1.2 features not yet verified on device
 
-**Phase 1 is complete. Phase 2 starts only when Yujin says so.**
+**Phase 1 IN PROGRESS — not complete until Yujin explicitly confirms. Phase 2 starts only when Yujin says so.**
 
 ---
 
