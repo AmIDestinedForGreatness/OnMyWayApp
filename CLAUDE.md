@@ -6,7 +6,7 @@ Project instructions and session state for Claude Code. Read this before touchin
 
 ## Version
 
-**Current: V.1.1** — Phase 1, update 1
+**Current: V.1.2** — Phase 1, update 2
 
 **Versioning system:**
 - Phase 1 = V.1.x — each update increments +0.1 (V.1.1 → V.1.2 → ...)
@@ -16,6 +16,7 @@ Project instructions and session state for Claude Code. Read this before touchin
 **Changelog:**
 - V.1.0: Core map, navigation, chat, profiles, SellScreen, date picker, cost calculator, booking inquiry — all screens built and working
 - V.1.1: Amenities filter, Premium Membership UI (mock), OMW Coins (mock), Boost button, bug fixes (route loop + joystick teleport)
+- V.1.2: Direction arrows on route polyline, Boost button in Profile → MembershipScreen, map location picker in SellScreen (tap-to-place), test listing id:10, listing management in Profile (action sheet, edit modal, RESERVED/BOOKED badges, delete), updateProperty + deleteProperty in PropertiesContext
 
 ---
 
@@ -167,8 +168,15 @@ Mom's PC:     C:\Users\MARVIN-LI\Documents\OnMyWay\OnMyWayApp
 17. Custom UserMarker (pulsing blue dot, red when spoofed)
 18. Profile: avatar upload, edit info, 3 tabs (listings/received/given reviews)
 19. Settings, Help screens
-20. SellScreen: photos, type, price, amenities, guests, nights, description + Boost button
+20. SellScreen: photos, type, price, amenities, guests, nights, description + tap-to-place map location picker
 21. MembershipScreen: OMW Coins balance, boost tiers, Basic/Pro plans (mock)
+22. Direction arrows along route polyline (1 for straight-line, up to 5 for OSRM)
+23. Profile: Boost button on each listing card → MembershipScreen
+24. Profile: listing cards open action sheet (Edit, Reserve, Book, Delete)
+25. Profile: edit modal for title, price, address, description — saves live to map
+26. Profile: RESERVED (orange) and BOOKED (red) status badges on listing cards
+27. PropertiesContext: updateProperty and deleteProperty functions
+28. Test listing id:10 (owned by Yujin, for dev testing)
 
 ---
 
